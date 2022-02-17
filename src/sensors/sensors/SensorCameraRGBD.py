@@ -72,7 +72,7 @@ class SensorCameraRGBD(TSSSensor):
         super(SensorCameraRGBD, self).__init__()
 
         # class vars ###################################################################################################
-        self._k_mat = np.zeros((3,3))                               # K matrix
+        self._k_mat = np.zeros((3, 3))                               # K matrix
         ############################################################################################ end of class vars #
         
 
@@ -113,7 +113,7 @@ class SensorCameraRGBD(TSSSensor):
         # obtian K matrix from cfg #####################################################################################
         for ii in range(0,3):
             for jj in range(0,3):
-                self._k_mat[ii,jj] = self._cfg["KMatrix"][ii*3+jj]
+                self._k_mat[ii, jj] = self._cfg["KMatrix"][ii*3+jj]
         ############################################################################## end of obtian K matrix from cfg #
 
         # create camera
@@ -167,14 +167,14 @@ class SensorCameraRGBD(TSSSensor):
         # based on https://blender.stackexchange.com/a/120063
 
         # get focal lenght and principle point from K matrix
-        _f_x = self._k_mat[0,0]
-        _f_y = self._k_mat[1,1]
-        _c_x = self._k_mat[0,2]
-        _c_y = self._k_mat[1,2]
+        _f_x = self._k_mat[0, 0]
+        _f_y = self._k_mat[1, 1]
+        _c_x = self._k_mat[0, 2]
+        _c_y = self._k_mat[1, 2]
 
         # get image resolution
-        _w = self._cfg["imageResolution"][0]
-        _h = self._cfg["imageResolution"][1]
+        _w = int(self._cfg["sensorSize"][0] / self._cfg["pixelSize"][0])
+        _h = int(self._cfg["sensorSize"][1] / self._cfg["pixelSize"][1])
 
         # calc field of view
         _fov = 2.0*math.atan(_w/(2*_f_x))
@@ -203,6 +203,9 @@ class SensorCameraRGBD(TSSSensor):
             else:
                 _v = pixel_aspect_ratio * _h
 
+        self._sensor.data.sensor_width = self._cfg['sensorSize'][0]
+        self._sensor.data.sensor_height = self._cfg['sensorSize'][1]
+
         # Set shift
         self._sensor.data.shift_x = ((_w/2.)-_c_x)/ _v
         self._sensor.data.shift_y = ((_h/2.)-_c_y)/ _v * _f_ratio
@@ -214,7 +217,7 @@ class SensorCameraRGBD(TSSSensor):
         # set transformation for camera
         self._sensor.rotation_mode = 'QUATERNION'        
         self._base_to_sensor = self._cfg["transformation"]
-        self._sensor.location = (self._base_to_sensor[0],self._base_to_sensor[1],self._base_to_sensor[2])
+        self._sensor.location = (self._base_to_sensor[0], self._base_to_sensor[1], self._base_to_sensor[2])
         self._sensor.rotation_quaternion = (self._base_to_sensor[3],
                                             self._base_to_sensor[4],
                                             self._base_to_sensor[5],

@@ -10,12 +10,14 @@ import os
 
 from src.assets.TSSMesh import TSSMesh
 
+
 class MeshMultipleRandom(TSSMesh):
     """docstring for MeshMultipleRandom"""
+
     def __init__(self):
         super(MeshMultipleRandom, self).__init__()
         # class vars ###################################################################################################
-        self._single_stage = None                               # blender stage objcet [blObject]
+        self._single_stage = None  # blender stage objcet [blObject]
         self._mesh_file_path = None
         self._min_number_instances = None
         self._max_number_instances = None
@@ -32,8 +34,8 @@ class MeshMultipleRandom(TSSMesh):
         self._rotation_option_phase_random = None
         self._mix_shader_node = None
         self._num_instance_label_per_channel = 51
-        self._max_instances_labels = self._num_instance_label_per_channel*self._num_instance_label_per_channel\
-                                                                    *self._num_instance_label_per_channel
+        self._max_instances_labels = self._num_instance_label_per_channel * self._num_instance_label_per_channel \
+                                     * self._num_instance_label_per_channel
         self._num_labels_per_channel = 15
         self._node_tree = None
         self._particle_system = None
@@ -47,7 +49,6 @@ class MeshMultipleRandom(TSSMesh):
         self._instance_switch_node_list = []
         self._label_ID_Node_list = []
         ############################################################################################ end of class vars #
-
 
     def reset(self):
         """ reset all local vars
@@ -58,7 +59,7 @@ class MeshMultipleRandom(TSSMesh):
         """
 
         # class vars ###################################################################################################
-        self._single_stage = None                               # blender stage objcet [blObject]
+        self._single_stage = None  # blender stage objcet [blObject]
         self._mesh_file_path = None
         self._min_number_instances = None
         self._max_number_instances = None
@@ -75,8 +76,8 @@ class MeshMultipleRandom(TSSMesh):
         self._rotation_option_phase_random = None
         self._mix_shader_node = None
         self._num_instance_label_per_channel = 51
-        self._max_instances_labels = self._num_instance_label_per_channel*self._num_instance_label_per_channel\
-                                                                    *self._num_instance_label_per_channel
+        self._max_instances_labels = self._num_instance_label_per_channel * self._num_instance_label_per_channel \
+                                     * self._num_instance_label_per_channel
         self._num_labels_per_channel = 15
         self._node_tree = None
         self._particle_system = None
@@ -91,8 +92,7 @@ class MeshMultipleRandom(TSSMesh):
         self._label_ID_Node_list = []
         ############################################################################################ end of class vars #
 
-
-    def create(self,instance_id_offset=0):
+    def create(self, instance_id_offset=0):
         """ create function
         Args:
             instance_id_offset:                                     instance offset ID [int]
@@ -107,18 +107,17 @@ class MeshMultipleRandom(TSSMesh):
         # update _num_instance_label_per_channel if provided
         if "numInstanceLabelPerChannel" in self._cfg:
             self._num_instance_label_per_channel = self._cfg["numInstanceLabelPerChannel"]
-            self._max_instances_labels = self._num_instance_label_per_channel*self._num_instance_label_per_channel\
-                                                                    *self._num_instance_label_per_channel
+            self._max_instances_labels = self._num_instance_label_per_channel * self._num_instance_label_per_channel \
+                                         * self._num_instance_label_per_channel
 
         # create particles and get number of particles
-        _current_real_particle_count, _current_real_particle_label_count = self._create_particle_meshes(\
-                                                                                    mesh_settings_cfg=self._cfg,
-                                                                                    instance_ID_offset=instance_id_offset,
-                                                                                    emitter=_local_emitter)
+        _current_real_particle_count, _current_real_particle_label_count = self._create_particle_meshes( \
+            mesh_settings_cfg=self._cfg,
+            instance_ID_offset=instance_id_offset,
+            emitter=_local_emitter)
 
         # return number of created particles
         return _current_real_particle_count, _current_real_particle_label_count
-
 
     def step(self):
         """ settping function
@@ -128,7 +127,6 @@ class MeshMultipleRandom(TSSMesh):
             None
         """
         pass
-
 
     def get_meshes(self):
         """ get mesh function
@@ -140,8 +138,7 @@ class MeshMultipleRandom(TSSMesh):
         # TODO: implement function to return objects
         return None
 
-
-    def _create_particle_meshes(self,mesh_settings_cfg,local_color_vec=[],instance_ID_offset=0,emitter=None):
+    def _create_particle_meshes(self, mesh_settings_cfg, local_color_vec=[], instance_ID_offset=0, emitter=None):
         """ function to create particle system
         Args:
             mesh_settings_cfg:
@@ -165,7 +162,7 @@ class MeshMultipleRandom(TSSMesh):
         if not os.path.isabs(self._mesh_file_path):
             # create abs path
             _current_path = os.path.dirname(__file__)
-            self._mesh_file_path = os.path.join(_current_path,"../../../",self._mesh_file_path)
+            self._mesh_file_path = os.path.join(_current_path, "../../../", self._mesh_file_path)
 
         # get the number of desired instances
         if len(mesh_settings_cfg['numberInstances']) == 1:
@@ -177,7 +174,7 @@ class MeshMultipleRandom(TSSMesh):
 
         # switch var
         self._random_switch_on_off = mesh_settings_cfg['randomSwitchOnOff']
-        
+
         # deformation and transformation parameters
         self._default_size = float(mesh_settings_cfg['defaultSize'])
         self._strength_random_scale = mesh_settings_cfg['strengthRandomScale']
@@ -203,41 +200,39 @@ class MeshMultipleRandom(TSSMesh):
         # build up full mesh name
         _local_mesh_name = 'mesh_MeshMutipleRandom_' + mesh_settings_cfg["name"]
 
-
         # load particle object #########################################################################################
         # def mesh
         _mesh = None
 
         # check if mesh asset already exist; if not load it
         if not _mesh:
-            bpy.ops.wm.append(  directory=os.path.join(self._mesh_file_path,"Object"),
-                                link=False,
-                                filename=_mesh_object_file_name)
+            bpy.ops.wm.append(directory=os.path.join(self._mesh_file_path, "Object"),
+                              link=False,
+                              filename=_mesh_object_file_name)
             _mesh = bpy.context.scene.objects[_mesh_object_file_name]
             _mesh.name = _local_mesh_name
 
             # rotate object before using it, if requested
             if "preRotationDeg" in mesh_settings_cfg:
-                _mesh.rotation_euler[0] = (mesh_settings_cfg["preRotationDeg"][0]*np.pi)/180
-                _mesh.rotation_euler[1] = (mesh_settings_cfg["preRotationDeg"][1]*np.pi)/180
-                _mesh.rotation_euler[2] = (mesh_settings_cfg["preRotationDeg"][2]*np.pi)/180
+                _mesh.rotation_euler[0] = (mesh_settings_cfg["preRotationDeg"][0] * np.pi) / 180
+                _mesh.rotation_euler[1] = (mesh_settings_cfg["preRotationDeg"][1] * np.pi) / 180
+                _mesh.rotation_euler[2] = (mesh_settings_cfg["preRotationDeg"][2] * np.pi) / 180
 
             # apply scale and roation
             bpy.context.view_layer.objects.active = _mesh
             bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-       ################################################################################### end of load particle object #
+        ################################################################################### end of load particle object #
 
         if mesh_settings_cfg['meshEmitter'] == "CUSTOM":
             # load emitter object ######################################################################################
             emitterObjectFileName = os.path.basename(os.path.normpath(os.path.splitext(self._emitter_file_path)[0]))
-            bpy.ops.wm.append(  directory=os.path.join(self._emitter_file_path,"Object"), 
-                                link=False,
-                                filename=emitterObjectFileName)
+            bpy.ops.wm.append(directory=os.path.join(self._emitter_file_path, "Object"),
+                              link=False,
+                              filename=emitterObjectFileName)
             self._emitter = bpy.context.scene.objects[emitterObjectFileName]
             self._emitter.name = 'mesh_MeshMutipleRandom_' + mesh_settings_cfg["name"] + '_emitter'
             ############################################################################### end of load emitter object #
         ###################################################################################### end of load/get objects #
-
 
         # adapt material of node to be useable for labeling ############################################################
         _label_ID_mat = mesh_settings_cfg['passParams']['semantic_label']['labelIDVec']
@@ -258,37 +253,34 @@ class MeshMultipleRandom(TSSMesh):
             else:
                 _label_ID = 1
 
-            _label_ID_vec = _label_ID_mat[_label_ID-1]
-
+            _label_ID_vec = _label_ID_mat[_label_ID - 1]
 
             # create label node ######################################################################
             # calculate the corresponding label values and stack up to list
             # TODO: add condition if rendering label is even set?!
             self._instance_label_active = mesh_settings_cfg['instanceLabelActive']
 
-            _label_node,_label_ID_Node = self.create_semantic_nodes(\
-                                                                node_tree=material,
-                                                                label_ID_vec=_label_ID_vec,
-                                                                num_label_per_channel=self._num_labels_per_channel,
-                                                                node_offset=[_global_Pos_GX,_global_Pos_GY+1500])
-            
+            _label_node, _label_ID_Node = self.create_semantic_nodes(node_tree=material,
+                                                                     label_ID_vec=_label_ID_vec,
+                                                                     num_label_per_channel=self._num_labels_per_channel,
+                                                                     node_offset=[_global_Pos_GX, _global_Pos_GY + 1500])
+
             _label_node.inputs[0].default_value = 1
             ##########################################################################################
-            
+
             self._label_ID_Node_list.append(_label_ID_Node)
 
             if self._instance_label_active:
 
                 # add particle info node
                 _particle_info_node = material.node_tree.nodes.new('ShaderNodeParticleInfo')
-                _particle_info_node.location = (_global_Pos_GX-500,_global_Pos_GY+300)
+                _particle_info_node.location = (_global_Pos_GX - 500, _global_Pos_GY + 300)
 
-                _instance_switch_node,_instance_add_node = \
-                                self._create_id_to_rgb_node_tree(node_tree=material,
-                                                                num_label_per_channel=self._num_instance_label_per_channel,
-                                                                instance_ID_offset=instance_ID_offset,
-                                                                node_offset=[_global_Pos_GX,_global_Pos_GY])
-
+                _instance_switch_node, _instance_add_node = \
+                    self._create_id_to_rgb_node_tree(node_tree=material,
+                                                     num_label_per_channel=self._num_instance_label_per_channel,
+                                                     instance_ID_offset=instance_ID_offset,
+                                                     node_offset=[_global_Pos_GX, _global_Pos_GY])
 
                 self._instance_switch_node_list.append(_instance_switch_node)
 
@@ -298,37 +290,36 @@ class MeshMultipleRandom(TSSMesh):
 
                 # create default color node
                 _default_instance_color = material.node_tree.nodes.new("ShaderNodeRGB")
-                _default_instance_color.location = (_global_Pos_GX,_global_Pos_GY)
-                _default_instance_color.outputs[0].default_value = (0,0,0,1)
+                _default_instance_color.location = (_global_Pos_GX, _global_Pos_GY)
+                _default_instance_color.outputs[0].default_value = (0, 0, 0, 1)
 
                 # combine label and instance channel ###########################################
                 _instance_switch_node = material.node_tree.nodes.new('ShaderNodeMixRGB')
                 _instance_switch_node.name = "instanceLabelsEnabled"
                 _instance_switch_node.label = "instanceLabelsEnabled"
                 _instance_switch_node.inputs[0].default_value = 0
-                _instance_switch_node.location = (_global_Pos_GX+2000,_global_Pos_GY+300)
+                _instance_switch_node.location = (_global_Pos_GX + 2000, _global_Pos_GY + 300)
                 material.node_tree.links.new(_instance_switch_node.inputs[2], _default_instance_color.outputs[0])
                 material.node_tree.links.new(_instance_switch_node.inputs[1], _label_node.outputs[0])
                 ###########################################
 
                 self._instance_switch_node_list.append(_instance_switch_node)
 
-            
             # add diffuse shader
             _diffuse_label_shader = material.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
-            _diffuse_label_shader.location = (_global_Pos_GX+2200,_global_Pos_GY+300)
+            _diffuse_label_shader.location = (_global_Pos_GX + 2200, _global_Pos_GY + 300)
             material.node_tree.links.new(_diffuse_label_shader.inputs[0], _instance_switch_node.outputs[0])
 
             # get current material output and add mix shader
             _material_output = material.node_tree.nodes["Material Output"]
-            _material_output.location = (_global_Pos_GX+2600,_global_Pos_GY+300)
+            _material_output.location = (_global_Pos_GX + 2600, _global_Pos_GY + 300)
             _mix_shader_node = material.node_tree.nodes.new('ShaderNodeMixShader')
             _mix_shader_node.name = "rgb-label-mix"
             _mix_shader_node.inputs[0].default_value = 0
-            _mix_shader_node.location = (_global_Pos_GX+2400,_global_Pos_GY+300)
+            _mix_shader_node.location = (_global_Pos_GX + 2400, _global_Pos_GY + 300)
             self._mix_shader_node_list.append(_mix_shader_node)
             _current_material_output = _material_output.inputs[0].links[0].from_node
-            
+
             material.node_tree.links.new(_mix_shader_node.inputs[1], _current_material_output.outputs[0])
             material.node_tree.links.new(_mix_shader_node.inputs[2], _diffuse_label_shader.outputs[0])
             material.node_tree.links.new(_material_output.inputs[0], _mix_shader_node.outputs[0])
@@ -355,37 +346,36 @@ class MeshMultipleRandom(TSSMesh):
                 self._min_number_instances = int(mesh_settings_cfg['densityMapSettings']['numberInstances'][0])
                 self._max_number_instances = int(mesh_settings_cfg['densityMapSettings']['numberInstances'][1])
 
-            _density_tex = bpy.data.textures.new(mesh_settings_cfg['name']+ "_DensityMap", \
-                                                    mesh_settings_cfg['densityMapSettings']['densityMap']['noiseType'])
-            
-            if "VORONOI" == mesh_settings_cfg['densityMapSettings']['densityMap']['noiseType']:
+            _density_tex = bpy.data.textures.new(mesh_settings_cfg['name'] + "_DensityMap", \
+                                                 mesh_settings_cfg['densityMapSettings']['densityMap']['noiseType'])
 
+            if "VORONOI" == mesh_settings_cfg['densityMapSettings']['densityMap']['noiseType']:
                 _density_tex.noise_intensity = float(mesh_settings_cfg['densityMapSettings']['densityMap']['intensity'])
                 _density_tex.noise_scale = float(mesh_settings_cfg['densityMapSettings']['densityMap']['size'])
 
                 _density_tex.use_color_ramp = True
-                _density_tex.color_ramp.elements[0].position = mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopPosition_0']
-                _density_tex.color_ramp.elements[1].position = mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopPosition_1']
+                _density_tex.color_ramp.elements[0].position = mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                    ['colorStopPosition_0']
+                _density_tex.color_ramp.elements[1].position = mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                    ['colorStopPosition_1']
 
-                _density_tex.color_ramp.elements[0].color = (mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_0'][0],
-                                                            mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_0'][1],
-                                                            mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_0'][2],
-                                                            mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_0'][3])
+                _density_tex.color_ramp.elements[0].color = (mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_0'][0],
+                                                             mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_0'][1],
+                                                             mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_0'][2],
+                                                             mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_0'][3])
 
-                _density_tex.color_ramp.elements[1].color = (mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_1'][0],
-                                                            mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_1'][1],
-                                                            mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_1'][2],
-                                                            mesh_settings_cfg['densityMapSettings']['densityMap']\
-                                                                                                ['colorStopColor_1'][3])
+                _density_tex.color_ramp.elements[1].color = (mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_1'][0],
+                                                             mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_1'][1],
+                                                             mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_1'][2],
+                                                             mesh_settings_cfg['densityMapSettings']['densityMap'] \
+                                                                 ['colorStopColor_1'][3])
 
             if "BLEND" == mesh_settings_cfg['densityMapSettings']['densityMap']['noiseType']:
                 _density_tex.progression = mesh_settings_cfg['densityMapSettings']['densityMap']['progression']
@@ -401,23 +391,24 @@ class MeshMultipleRandom(TSSMesh):
             _particle_density_map.blend_type = 'MULTIPLY'
 
             # TODO: the mapping values should change for each step
-            _particle_density_map.offset[0] = random.randint(-5.0,5.0)
-            _particle_density_map.offset[1] = random.randint(-5.0,5.0)
+            _particle_density_map.offset[0] = random.randint(-5.0, 5.0)
+            _particle_density_map.offset[1] = random.randint(-5.0, 5.0)
 
             if "scale" in mesh_settings_cfg['densityMapSettings']['densityMap']:
                 _particle_density_map.scale[0] = float(mesh_settings_cfg['densityMapSettings']['densityMap']["scale"])
                 _particle_density_map.scale[1] = float(mesh_settings_cfg['densityMapSettings']['densityMap']["scale"])
                 _particle_density_map.scale[2] = float(mesh_settings_cfg['densityMapSettings']['densityMap']["scale"])
 
-
         # setup options 'Emission'
         if self._random_switch_on_off:
             if bool(random.getrandbits(1)):
-                self._particle_system.settings.count = random.randint(self._min_number_instances,self._max_number_instances)
+                self._particle_system.settings.count = random.randint(self._min_number_instances,
+                                                                      self._max_number_instances)
             else:
                 self._particle_system.settings.count = 0
         else:
-            self._particle_system.settings.count = random.randint(self._min_number_instances,self._max_number_instances)
+            self._particle_system.settings.count = random.randint(self._min_number_instances,
+                                                                  self._max_number_instances)
         self._currentSeed = random.randrange(1000000)
         self._particle_system.seed = self._currentSeed
         self._particle_system.settings.hair_length = 1
@@ -448,12 +439,11 @@ class MeshMultipleRandom(TSSMesh):
         self._particle_system.settings.instance_object = _mesh
         ################################################################################################################
 
-
         _depth_graph = bpy.context.evaluated_depsgraph_get()
 
         _current_real_particle_count = len(self._emitter.evaluated_get(_depth_graph).particle_systems[-1].particles)
 
-        if _current_real_particle_count+instance_ID_offset >= self._max_instances_labels:
+        if _current_real_particle_count + instance_ID_offset >= self._max_instances_labels:
             self._print_msg('Exceeded max instance number for instance labels. Set instance count accordingly!')
             self._print_msg("self._max_instances_labels: " + str(self._max_instances_labels))
             self._print_msg("instance_ID_offset: " + str(instance_ID_offset))
@@ -469,32 +459,31 @@ class MeshMultipleRandom(TSSMesh):
         if self._instance_label_active:
             _current_real_particle_label_count = _current_real_particle_count
 
-
         # Pass entries #################################################################################################
         # RGBDPass entries #############################################################################################
         for mix_shader_node in self._mix_shader_node_list:
             self.add_pass_entry(pass_name="RGBDPass",
                                 node_handle=mix_shader_node,
                                 value_type="inputs",
-                                value=[0,0])
+                                value=[0, 0])
         for instance_switch_node in self._instance_switch_node_list:
             self.add_pass_entry(pass_name="RGBDPass",
                                 node_handle=instance_switch_node,
                                 value_type="inputs",
-                                value=[0,0])
+                                value=[0, 0])
         ###################################################################################### end of RGBDPass entries #
-        
+
         # SemanticPass entries #########################################################################################
         for mix_shader_node in self._mix_shader_node_list:
             self.add_pass_entry(pass_name="SemanticPass",
                                 node_handle=mix_shader_node,
                                 value_type="inputs",
-                                value=[0,1])
+                                value=[0, 1])
         for instance_switch_node in self._instance_switch_node_list:
             self.add_pass_entry(pass_name="SemanticPass",
                                 node_handle=instance_switch_node,
                                 value_type="inputs",
-                                value=[0,0])
+                                value=[0, 0])
         ################################################################################## end of SemanticPass entries #
 
         # SemanticPass entries #########################################################################################
@@ -502,21 +491,19 @@ class MeshMultipleRandom(TSSMesh):
             self.add_pass_entry(pass_name="InstancePass",
                                 node_handle=mix_shader_node,
                                 value_type="inputs",
-                                value=[0,1])
+                                value=[0, 1])
         for instance_switch_node in self._instance_switch_node_list:
             self.add_pass_entry(pass_name="InstancePass",
                                 node_handle=instance_switch_node,
                                 value_type="inputs",
-                                value=[0,1])
+                                value=[0, 1])
         ################################################################################## end of SemanticPass entries #
         ########################################################################################## end of Pass entries #
         self._node_tree = self._node_tree
 
         return _current_real_particle_count, _current_real_particle_label_count
 
-
-
-    def additional_pass_action(self,pass_name, pass_cfg, keyframe):
+    def additional_pass_action(self, pass_name, pass_cfg, keyframe):
         """ overwrite base function
         Args:
             pass_name:      name of pass to activate [string]
@@ -529,10 +516,10 @@ class MeshMultipleRandom(TSSMesh):
         # set semantic ID ##############################################################################################
         if "SemanticPass" == pass_name:
             for label_ID_node in self._label_ID_Node_list:
-                label_ID_node.outputs[0].default_value = pass_cfg["activationID"]+1
+                label_ID_node.outputs[0].default_value = pass_cfg["activationID"] + 1
                 if keyframe > -1:
                     label_ID_node.outputs[0].keyframe_insert('default_value', frame=keyframe)
         ####################################################################################### end of set semantic ID #
 
         if keyframe > -1:
-            self._set_keyframe_interpolation(node_tree=self._node_tree,interpolation='CONSTANT')
+            self._set_keyframe_interpolation(node_tree=self._node_tree, interpolation='CONSTANT')

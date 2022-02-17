@@ -9,33 +9,34 @@ import importlib
 
 from src.TSSBase import TSSBase
 
+
 class TSSSensorHandle(TSSBase):
     """docstring for TSSSensorHandle"""
+
     def __init__(self):
         super(TSSSensorHandle, self).__init__()
         # class vars ###################################################################################################
-        self._sensor_list = []                                          # list of sensors [list]
-        self._target_pose_list = []                                     # list of target poses [list]
-        self._target_object_active = False                              # flag whether target object is active [bool]
-        self._sensor_movement_type = -1                                 # movement type [int]
-        self._sensor_pose_list = []                                     # list of sensor poses [list]
-        self._pose_index = 0                                            # current pose index [int]
-        self._sensor_base = None                                        # sensor base of all sensors [blObject]
-        self._sensor_base_constraint = None                             # sensor base constraint object of all sensors 
-                                                                        #                                    [blObject]
-        self._target_object = None                                      # target object of sensor base [blObject]
-        self._hover_base_constraint = None                              # hover constraint for base [blObject]
-        self._hover_target_constraint = None                            # hover constraint for target [blObject]
-        self._sensor_movement_type_mapping = {                          # mapping to movement functions [dict]
-                                                "deterministic": self._deterministic,
-                                                "randomEuclidean": self._random_euclidean,
-                                                "randomEuclideanTarget": self._random_euclidean_target}
-        self._roll_limits = [0,0]
+        self._sensor_list = []  # list of sensors [list]
+        self._target_pose_list = []  # list of target poses [list]
+        self._target_object_active = False  # flag whether target object is active [bool]
+        self._sensor_movement_type = -1  # movement type [int]
+        self._sensor_pose_list = []  # list of sensor poses [list]
+        self._pose_index = 0  # current pose index [int]
+        self._sensor_base = None  # sensor base of all sensors [blObject]
+        self._sensor_base_constraint = None  # sensor base constraint object of all sensors
+        #                                    [blObject]
+        self._target_object = None  # target object of sensor base [blObject]
+        self._hover_base_constraint = None  # hover constraint for base [blObject]
+        self._hover_target_constraint = None  # hover constraint for target [blObject]
+        self._sensor_movement_type_mapping = {  # mapping to movement functions [dict]
+            "deterministic": self._deterministic,
+            "randomEuclidean": self._random_euclidean,
+            "randomEuclideanTarget": self._random_euclidean_target}
+        self._roll_limits = [0, 0]
         ############################################################################################ end of class vars #
 
         # set correct module type
         self.set_module_type(type=1)
-        
 
     def reset_module(self):
         """ reset all local vars
@@ -66,11 +67,10 @@ class TSSSensorHandle(TSSBase):
         self._sensor_base = None
         self._target_object = None
         self._sensor_base_constraint = None
-        self._roll_limits = [0,0]
+        self._roll_limits = [0, 0]
         ############################################################################################ end of reset vars #
 
-
-    def _create_base_object(self,cfg):
+    def _create_base_object(self, cfg):
         """ create base object
         Args:
             cfg:            general part of cfg from sensor handle [dict]
@@ -78,9 +78,8 @@ class TSSSensorHandle(TSSBase):
             ErrorCode:      error code; 0 if sucessful
         """
 
-        
         # create empty blender object ##################################################################################
-        self._sensor_base = bpy.data.objects.new("empty",None)
+        self._sensor_base = bpy.data.objects.new("empty", None)
         self._sensor_base.name = "sensor_base"
         self._sensor_base.empty_display_type = 'PLAIN_AXES'
         self._sensor_base.empty_display_size = 0.5
@@ -88,7 +87,7 @@ class TSSSensorHandle(TSSBase):
         ########################################################################### end of create empty blender object #
 
         # create empty blender object for sensor base to apply constraints #############################################
-        self._sensor_base_constraint = bpy.data.objects.new("empty",None)
+        self._sensor_base_constraint = bpy.data.objects.new("empty", None)
         self._sensor_base_constraint.name = "dummy_object"
         self._sensor_base_constraint.empty_display_type = 'PLAIN_AXES'
         self._sensor_base_constraint.empty_display_size = 0.5
@@ -100,18 +99,19 @@ class TSSSensorHandle(TSSBase):
             self._roll_limits = cfg["randomTargetRollDeg"]
         else:
             if "randomTargetRollDeg" in self._cfg["GENERAL"]:
-                self._roll_limits[0] = (np.pi/180.)*cfg["randomTargetRollDeg"][0]
-                self._roll_limits[1] = (np.pi/180.)*cfg["randomTargetRollDeg"][1]
+                self._roll_limits[0] = (np.pi / 180.) * cfg["randomTargetRollDeg"][0]
+                self._roll_limits[1] = (np.pi / 180.) * cfg["randomTargetRollDeg"][1]
             else:
-                self._roll_limits = [0,0]
+                self._roll_limits = [0, 0]
         ##################################################################################### end of store roll values #
-        
+
         # create movement pattern of sensor base
-        self._sensor_pose_list,self._target_pose_list=self._sensor_movement_type_mapping[cfg["sensorMovementType"]](cfg)
+        self._sensor_pose_list, self._target_pose_list = self._sensor_movement_type_mapping[cfg["sensorMovementType"]](
+            cfg)
 
         # interpolate pose frames if needed ############################################################################
         if "interpolationMode" in cfg:
-            
+
             # interpolate base poses
             self._sensor_pose_list = self._pose_interpolate(pose_list=self._sensor_pose_list,
                                                             interpolation_mode=cfg["interpolationMode"])
@@ -129,7 +129,7 @@ class TSSSensorHandle(TSSBase):
             # enable target object flag
             self._target_object_active = True
             # create target object #####################################################################################
-            self._target_object = bpy.data.objects.new("empty",None)
+            self._target_object = bpy.data.objects.new("empty", None)
             self._target_object.name = "target_object"
             self._target_object.empty_display_type = 'PLAIN_AXES'
             self._target_object.empty_display_size = 0.5
@@ -161,25 +161,23 @@ class TSSSensorHandle(TSSBase):
             self._sensor_base_constraint.constraints["Track To"].up_axis = 'UP_Y'
             ############################################################### end of create target object to sensor base #
         ####################################################################################### target object creation #
-        
 
-    def set_stages(self,stages):
+    def set_stages(self, stages):
         if self._hover_base_constraint is not None:
             _stage = stages[self._cfg["GENERAL"]["hoverBaseStage"]]
             if _stage is not None:
                 self._hover_base_constraint.target = _stage
             else:
-                raise("Stage for base hovering mode was not found!")
+                raise "Stage for base hovering mode was not found!"
 
         if self._hover_target_constraint is not None:
             _stage = stages[self._cfg["GENERAL"]["hoverTargetStage"]]
             if _stage is not None:
                 self._hover_target_constraint.target = _stage
             else:
-                raise("Stage for target hovering mode was not found!")
+                raise "Stage for target hovering mode was not found!"
 
-
-    def _create_sensors(self,cfg):
+    def _create_sensors(self, cfg):
         """ create all sensors defined in cfg
         Args:
             cfg:            sensors part of cfg from sensor handle [dict]
@@ -199,10 +197,10 @@ class TSSSensorHandle(TSSBase):
 
                 # update sensor cfg
                 _sensor.update_cfg(cfg=sensor["sensorParams"])
-                
+
                 # create sensor
                 _sensor.create()
-                
+
                 # add sensor to list
                 self._sensor_list.append(_sensor)
 
@@ -213,7 +211,6 @@ class TSSSensorHandle(TSSBase):
 
         return 0
         ######################################################################## end of go through cfg and add sensors #
-
 
     def _attach_sensors_to_base(self):
         """ parent sensors to base
@@ -232,16 +229,14 @@ class TSSSensorHandle(TSSBase):
 
         # go through all sensors and attach to base ####################################################################
         for sensor_obj in self._sensor_list:
-
             # get sensor handle
             _sensor = sensor_obj.get_sensor()
-            
+
             # set parent
             _sensor.parent = self._sensor_base
         ############################################################# end of go through all sensors and attach to base #
 
-
-    def _read_pose_from_CSV(self,csv_file_path):
+    def _read_pose_from_CSV(self, csv_file_path):
 
         # def local var
         _pose_list = []
@@ -256,7 +251,6 @@ class TSSSensorHandle(TSSBase):
 
             # iterate through csv lines ################################################################################
             for row in csvReader:
-
                 # def local pose var
                 _pose = np.zeros((8))
 
@@ -267,7 +261,7 @@ class TSSSensorHandle(TSSBase):
                 _pose[1] = float(row[1])  # posX
                 _pose[2] = float(row[2])  # posY
                 _pose[3] = float(row[3])  # posZ
-                
+
                 # read quaternion
                 _pose[4] = -float(row[5])  # quatW
                 _pose[5] = float(row[4])  # quatX
@@ -275,15 +269,14 @@ class TSSSensorHandle(TSSBase):
                 _pose[7] = -float(row[6])  # quatZ
 
                 # append retrieved pose sample to list
-                _pose_list.append(pose)
+                _pose_list.append(_pose)
             ######################################################################### end of iterate through csv lines #
         ###################################################################### end of go through csv file and get data #
 
         # return pose list
         return _pose_list
 
-
-    def _deterministic(self,cfg):
+    def _deterministic(self, cfg):
         """ deterministic movement option; read movement from csv file
         Args:
             cfg:                        general part of cfg from sensor handle [dict] 
@@ -301,7 +294,6 @@ class TSSSensorHandle(TSSBase):
         # return movement lists
         return _pose_list, None
 
-
     def _random_euclidean(self, cfg):
         """ random euclidean movement option;  create random pose within box
         Args:
@@ -312,15 +304,14 @@ class TSSSensorHandle(TSSBase):
         """
 
         # create random poses
-        _pose_list = _create_euclidean_random_sensor_movements(min_pos=cfg["randomEuclideanPosMin"],
-                                                            max_pos=cfg["randomEuclideanPosMax"],
-                                                            num_samples=cfg["numSamples"],
-                                                            min_euler=cfg["randomEuclideanEulerMin"],
-                                                            max_euler=cfg["randomEuclideanEulerMax"])
+        _pose_list = self._create_euclidean_random_sensor_movements(min_pos=cfg["randomEuclideanPosMin"],
+                                                                    max_pos=cfg["randomEuclideanPosMax"],
+                                                                    num_samples=cfg["numSamples"],
+                                                                    min_euler=cfg["randomEuclideanEulerMin"],
+                                                                    max_euler=cfg["randomEuclideanEulerMax"])
 
         # return movement lists
         return _pose_list, None
-
 
     def _random_euclidean_target(self, cfg):
         """ random euclidean target movement option;  create random pose for base and target object within box
@@ -332,19 +323,18 @@ class TSSSensorHandle(TSSBase):
         """
 
         # create random poses for base and target
-        _pose_list, _target_pose_list =  self._create_euclidean_random_sensor_movements(\
-                                                                        min_pos=cfg["randomEuclideanPosMin"],
-                                                                        max_pos=cfg["randomEuclideanPosMax"],
-                                                                        num_samples=cfg["numSamples"],
-                                                                        target_active=True,
-                                                                        min_target_pos=cfg["randomTargetPosMin"],
-                                                                        max_target_pos=cfg["randomTargetPosMax"],
-                                                                        min_target_euler=cfg["randomTargetEulerMin"],
-                                                                        max_target_euler=cfg["randomTargetEulerMax"])
+        _pose_list, _target_pose_list = self._create_euclidean_random_sensor_movements( \
+            min_pos=cfg["randomEuclideanPosMin"],
+            max_pos=cfg["randomEuclideanPosMax"],
+            num_samples=cfg["numSamples"],
+            target_active=True,
+            min_target_pos=cfg["randomTargetPosMin"],
+            max_target_pos=cfg["randomTargetPosMax"],
+            min_target_euler=cfg["randomTargetEulerMin"],
+            max_target_euler=cfg["randomTargetEulerMax"])
 
         # return movement lists
         return _pose_list, _target_pose_list
-
 
     def _euler_to_quaternion(self, angles):
 
@@ -352,13 +342,16 @@ class TSSSensorHandle(TSSBase):
         pitch = angles[1]
         yaw = angles[2]
 
-        qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-        qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-        qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
-        qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(
+            yaw / 2)
+        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(
+            yaw / 2)
+        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(
+            yaw / 2)
+        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(
+            yaw / 2)
 
         return [qx, qy, qz, qw]
-
 
     def _create_random_pose_sample(self, min_pos, max_pos, min_euler, max_euler):
         """ create random pose
@@ -391,14 +384,13 @@ class TSSSensorHandle(TSSBase):
         # return random pose sample
         return _pose
 
-
-    def _create_euclidean_random_sensor_movements(  self,
-                                                min_pos, max_pos,
-                                                num_samples,
-                                                min_euler=[0,0,0], max_euler=[0,0,0],
-                                                target_active=False,
-                                                min_target_pos=[0,0,0], max_target_pos=[0,0,0],
-                                                min_target_euler=[0,0,0], max_target_euler=[0,0,0]):
+    def _create_euclidean_random_sensor_movements(self,
+                                                  min_pos, max_pos,
+                                                  num_samples,
+                                                  min_euler=[0, 0, 0], max_euler=[0, 0, 0],
+                                                  target_active=False,
+                                                  min_target_pos=[0, 0, 0], max_target_pos=[0, 0, 0],
+                                                  min_target_euler=[0, 0, 0], max_target_euler=[0, 0, 0]):
         """ create list of random poses, with or without random target pose list
         Args:
             min_pos:                            boundary values for minimum position [x,y,z] [numpy]
@@ -423,7 +415,7 @@ class TSSSensorHandle(TSSBase):
         ##################################################################################### end of def of local vars #
 
         # create num_samples samples of random poses ###################################################################
-        for pose_index in range(0,num_samples):
+        for pose_index in range(0, num_samples):
             # create var
             _pose = np.zeros((8))
 
@@ -442,16 +434,16 @@ class TSSSensorHandle(TSSBase):
             # create random target poses, if requested
             if target_active:
                 # create var
-                _target_pose = np.zeros((8))
+                _target_pose = np.zeros(8)
 
                 # frame ID
                 _target_pose[0] = pose_index + 1
 
                 # create random pose sample for target
-                _target_pose[1:] = self._create_random_pose_sample( min_pos=min_target_pos,
-                                                                    max_pos=max_target_pos,
-                                                                    min_euler=min_target_euler,
-                                                                    max_euler=max_target_euler)
+                _target_pose[1:] = self._create_random_pose_sample(min_pos=min_target_pos,
+                                                                   max_pos=max_target_pos,
+                                                                   min_euler=min_target_euler,
+                                                                   max_euler=max_target_euler)
 
                 # set offset
                 _target_pose[1:4] += _pose[1:4]
@@ -465,7 +457,6 @@ class TSSSensorHandle(TSSBase):
             return _pose_list, _target_pose_list
         else:
             return _pose_list
-
 
     def _pose_interpolate(self, pose_list, interpolation_mode="static"):
         """ interpolate missing poses in pose_list with a variety of options
@@ -492,7 +483,7 @@ class TSSSensorHandle(TSSBase):
             raise Exception("Not implemented yet!")
 
         if "step" == interpolation_mode:
-            raise Exception("Not implemented yet!") 
+            raise Exception("Not implemented yet!")
 
         if "linear" == interpolation_mode:
             raise Exception("Not implemented yet!")
@@ -500,7 +491,6 @@ class TSSSensorHandle(TSSBase):
 
         # return interpolated pose list
         return _pose_list
-
 
     def create(self):
         """ create function
@@ -511,7 +501,7 @@ class TSSSensorHandle(TSSBase):
         """
 
         # reset all local vars
-        #self._reset()
+        # self._reset()
 
         # create sensor base
         self._create_base_object(self._cfg["GENERAL"])
@@ -521,7 +511,6 @@ class TSSSensorHandle(TSSBase):
 
         # attach sensors to base
         self._attach_sensors_to_base()
-
 
     def step(self, keyframe):
         """ overwrite step function
@@ -536,16 +525,16 @@ class TSSSensorHandle(TSSBase):
 
         # move base pose one position forward ##########################################################################
         # get pose at pose_index
-        _pose = self._sensor_pose_list[self._pose_index-1]
+        _pose = self._sensor_pose_list[self._pose_index - 1]
         # update locaiton and rotation of base sensor
-        self._sensor_base_constraint.location = (_pose[1],_pose[2],_pose[3])
-        self._sensor_base_constraint.rotation_quaternion = (_pose[4],_pose[5],_pose[6],_pose[7])
+        self._sensor_base_constraint.location = (_pose[1], _pose[2], _pose[3])
+        self._sensor_base_constraint.rotation_quaternion = (_pose[4], _pose[5], _pose[6], _pose[7])
         ################################################################### end of move base pose one position forward #
 
         # update locaiton and rotation of target sensor ################################################################
         if self._target_object_active:
             # move target pose one position forward
-            _target_object_pose = self._target_pose_list[self._pose_index-1]
+            _target_object_pose = self._target_pose_list[self._pose_index - 1]
 
             # set position of target object
             self._target_object.location = (_target_object_pose[1],
@@ -553,10 +542,10 @@ class TSSSensorHandle(TSSBase):
                                             _target_object_pose[3])
 
             # set quaternion of target object
-            self._target_object.rotation_quaternion = ( _target_object_pose[4],
-                                                        _target_object_pose[5],
-                                                        _target_object_pose[6],
-                                                        _target_object_pose[7])
+            self._target_object.rotation_quaternion = (_target_object_pose[4],
+                                                       _target_object_pose[5],
+                                                       _target_object_pose[6],
+                                                       _target_object_pose[7])
         ######################################################### end of update locaiton and rotation of target sensor #
 
         # calc hover base z noise ######################################################################################
@@ -564,10 +553,10 @@ class TSSSensorHandle(TSSBase):
             if "hoverBaseDistanceNoise" in self._cfg["GENERAL"]:
                 _noise_value = float(self._cfg["GENERAL"]["hoverBaseDistanceNoise"])
                 _distance_random = random.uniform(0, _noise_value)
-                _distance_offset_value = self._cfg["GENERAL"]["hoverBaseDistance"] - _distance_random/2.0
+                _distance_offset_value = self._cfg["GENERAL"]["hoverBaseDistance"] - _distance_random / 2.0
                 self._hover_base_constraint.distance = _distance_offset_value
         ############################################################################### end of calc hover base z noise #
-        
+
         # set sensor base ##############################################################################################
         bpy.context.view_layer.update()
         self._sensor_base.matrix_world = self._sensor_base_constraint.matrix_world
@@ -606,7 +595,7 @@ class TSSSensorHandle(TSSBase):
                 for kf in fcurve.keyframe_points:
                     kf.interpolation = 'CONSTANT'
             # set interpolation of all keyframes########################################################################
-            
+
             # set keyframe for target ##################################################################################
             if self._target_object_active:
                 self._target_object.keyframe_insert('location', frame=keyframe)
@@ -620,7 +609,6 @@ class TSSSensorHandle(TSSBase):
                 # set interpolation of all keyframes####################################################################
             ########################################################################### end of set keyframe for target #
         ############################################################################ end of set keyframes if requested #
-
 
     def get_sensor_list(self):
         """ return self._sensor_list

@@ -1,5 +1,6 @@
 # blender imports
 import bpy
+print(bpy.app.version_string)
 
 # utility imports
 import numpy as np
@@ -65,7 +66,7 @@ class TSS_OP_CStageSimulator():
 
         # update output path
         if not _simulation_setup_dict['outputPath']:
-            _simulation_setup_dict['outputPath'] = os.path.join(_current_path,"../oaisys_tmp/")
+            _simulation_setup_dict['outputPath'] = os.path.join(_current_path, "../oaisys_tmp/")
 
 
         # create base folder
@@ -131,7 +132,7 @@ class TSS_OP_CStageSimulator():
 
 
             # iterate over all samples #################################################################################
-            for sample in range(1,_num_samples_per_batch+1):
+            for sample in range(1, _num_samples_per_batch+1):
 
                 _time_1 = time.time()
                 self._prCyan("Sample " + str((batch_ID-1)*_num_samples_per_batch+sample) + " / " + \

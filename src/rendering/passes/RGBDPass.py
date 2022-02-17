@@ -168,7 +168,7 @@ class RGBDPass(TSSRenderPass):
         self._pinhole_switch_node.label = 'depth_switch'
         self._pinhole_switch_node.check = False
         self._node_tree.links.new(self._render_layers_node.outputs['Depth'], self._pinhole_switch_node.inputs[1])
-        self._pinhole_switch_node.location = (node_offset[0]+2300,node_offset[1]+500)
+        self._pinhole_switch_node.location = (node_offset[0]+2300, node_offset[1]+500)
 
         # create output node pinhole depth
         self._pinhole_depth_output_node = self._node_tree.nodes.new(type="CompositorNodeOutputFile")
